@@ -1,0 +1,69 @@
+<% layout("/layouts/boilerplate") %>
+<div class="row">
+  <div class="col-8 offset-2">
+    <form method="post" action="/listings" novalidate class="needs-validation" enctype="multipart/form-data">
+      <br><br>
+
+        <h1> <b>Create a new Listing</b></h1>
+      <div>
+             <label for="title" class="form-label">Title</label>
+                <input name="listing[title]" id="title" placeholder="Enter a catchy title" type="text" class="form-control" required>
+                <div class="valid-feedback">Title looks good</div>
+      </div>
+            <br>
+      <div>
+        <label for="description" class="form-label">Description</label>
+        <textarea name="listing[description]" placeholder="Enter the description" id="description" class="form-control" required></textarea>
+         <div class="invalid-feedback">Enter a valid description</div>
+      </div>
+             <br><br>
+      <div>
+        <label for="price" class="form-label">Price</label>
+         <input id="price" name="listing[price]" type="Number" placeholder="12000" class="form-control" required>
+         <div class="invalid-feedback">Enter a valid price</div>
+       </div><br><br>
+      <!-- <div>
+           <label for="Image" class="form-label">URL</label>
+         <input name="listing[image][url]" placeholder="Enter the url" id="image" class="form-control" type="text">
+      </div><br> -->
+       <div>
+           <label for="Image" class="form-label">Upload Listing Image</label>
+         <input name="listing[image][url]"  id="image" class="form-control" type="file" required>
+      </div><br>
+    <div class="row">
+      <div class="col-md">
+           <label for="location" class="form-label">Location</label>
+         <input  name="listing[location]" placeholder="Goa" type="text" id="location" class="form-control" required>
+         <div class="invalid-feedback">Enter a valid location</div>
+       </div><br><br>
+       <div class="col-md">
+          <label for="country" class="form-label">Country</label>
+          <input name="listing[country]"  placeholder="India" type="text" id="country" required class="form-control"> 
+          <div class="invalid-feedback">Enter a valid country </div>
+       </div>
+       </div>    
+          <br><br>
+           <button class="btn-ctr">Submit</button>
+           <br>
+           <br>
+    </form>
+</div>
+</div>
+<script>
+  // /js/script.js
+(function () {
+  'use strict';
+  const forms = document.querySelectorAll('.needs-validation');
+  Array.from(forms).forEach(function (form) {
+    form.addEventListener('submit', function (event) {
+      if (!form.checkValidity()) {
+        event.preventDefault();
+        event.stopPropagation();
+      }
+      form.classList.add('was-validated');
+    }, false);
+  });
+})();
+ 
+      
+</script>

@@ -1,0 +1,24 @@
+<%if(secret && secret.length){%>
+    <div class="alert alert-success col-6 offset-3 alert-dismissible fade show" role="alert">
+  <%=secret%>
+
+  
+  <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close">
+ 
+  </button>
+   </div>
+  </div>
+  <%}%>
+
+
+  <%if(error && error.length){%>
+    <div class="alert alert-danger col-6 offset-3 alert-dismissible fade show" role="alert">
+  <%=error%>
+
+  
+  <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close">
+ 
+  </button>
+   </div>
+  </div>
+  <%}%>

@@ -1,0 +1,158 @@
+<% layout("/layouts/boilerplate") %>
+
+
+
+<br>
+<div class="row mt-3">
+    <div class="col-8 offset-3">
+  <h1> <%=listing.title%></h1>  
+
+  </div>
+
+<div class="card col-6 offset-3 listing-card">
+  <img class="show-img-top" src="<%=listing.image.url%>" >
+  <div class="card-body">
+   
+    <p class="card-text">
+        <P>Owned by  <%= listing.owner.username %></P>
+        <p><%= listing.description %></p>
+        <% if(listing.price) { %>
+          <div>
+       <P>  &#8377 <%= listing.price.toLocaleString("en-IN") %> </P>
+        
+
+      </div>
+        <%}%>
+        <p><%= listing.location %></p>
+       
+       <p> <%= listing.country %></p>
+    </p>
+    <% if(CurrUser && CurrUser._id.equals(listing.owner._id)){ %>
+    <div class="btn-show row">
+        <div class="btn-1 col-md-2 col-sm-3 btn-ctr ">
+        <a href="/listings/<%=listing._id%>/edit" class="btn btn-ctr">Edit</a> </div>
+            <div class="btn-2 col"> 
+            <form method="post" action="/listings/<%=listing._id%>?_method=DELETE">
+            <button class="btn btn-dark col"> Delete</button>
+           </form>
+      </div>    
+ <br>
+</div>
+<%}%>
+    <!-- //Review -->
+  <br>
+  <hr>
+<% if(CurrUser) { %>
+<div class="mt-3 mb-3">
+<h3>Leave a Review</h3>
+
+
+<form method="Post" action="/listings/<%=listing._id%>/reviews"   novalidate 
+class="needs-validation">
+
+
+<!-- <input name="review[rating]" type="range" class="form-range" min="1" max="5" id="customRange2"  oninput="document.getElementById('ratingValue').textContent = this.value"></div> -->
+  <div class="mb-3">
+<fieldset class="starability-slot">
+  <label for="rating" class="form-label" >Rating</label>
+ 
+  <input type="radio"
+  id="no-rate" 
+  class="input-no-rate" 
+  name="review[rating]"
+  value="0"
+  checked aria-label="No rating." />
+  <input type="radio" id="first-rate1" name="review[rating]" value="1" />
+  <label for="first-rate1" title="Terrible">1 star</label>
+  <input type="radio" id="first-rate2" name="review[rating]" value="2" />
+  <label for="first-rate2" title="Not good">2 stars</label>
+  <input type="radio" id="first-rate3" name="review[rating]" value="3" />
+  <label for="first-rate3" title="Average">3 stars</label>
+  <input type="radio" id="first-rate4" name="review[rating]"value="4" />
+  <label for="first-rate4" title="Very good">4 stars</label>
+  <!-- <input type="radio" id="first-rate5" name="review[rating]" value="5" />
+  <label for="first-rate5" title="Amazing">5 stars</label> -->
+</fieldset>
+</div>
+
+<div class="mb-3">
+  <label for="comment" class="form-label">Comment</label>
+  <textarea name="review[comment]"  cols="30" rows = "5" id="comment" class="form-control" required></textarea>
+  <div class="invalid-feedback">
+    Please add some comments for review
+  </div>
+</div>
+<button class="btn btn-outline-dark">Submit</button>
+        
+ </form>
+    </div>
+    <hr />
+
+
+    <!-- Render reviews -->
+    <!-- Review -->
+     <% if(listing.reviews.length > 0) {%>
+ 
+    <div class="row">
+    <h4> ALL REVIEWS</h4> 
+      <% for( let review of listing.reviews ) { %>
+   <div class="card mb-3 ms-3 cols-5" style="width:18rem">
+    <div class="card-body">
+      <h5 class="card-title">@<%=review.author.username %></h5>
+       <p class="card-text"><%=review.comment%></p>
+       <p class="starability-result" data-rating="<%=review.rating%>"></p>
+       
+       <form class="mb-3" method="Post" action="/listings/<%=listing._id%>/reviews/<%= review._id %>?_method=DELETE">
+        <button class=" btn btn-sm btn-dark">Delete</button>
+       </form>
+  
+  
+    </div>
+
+   </div>
+         <% } %>
+    </div>
+  <%}%>
+    <%}%>
+     <div class="col-8 mb-3">
+  <h3>
+    Where you'll be
+  </h3>
+    <div id="map"></div>
+   
+</div>
+</div>
+
+</div>
+
+
+</div>   
+
+
+<script> 
+  const mapToken = "<%= process.env.MAP_TOKEN %>";
+  const listing = <%-   JSON.stringify(listing) %>
+
+
+   maptilersdk.config.apiKey = mapToken;
+    const map = new maptilersdk.Map({
+        container: 'map', // container's id or the HTML element to render the map
+        center:listing.geometry.coordinates,
+        zoom:9,
+        style: maptilersdk.MapStyle.STREETS,
+
+      });
+      
+
+
+   
+  const marker = new maptilersdk.Marker({color:"red"})
+  .setLngLat(listing.geometry.coordinates)
+  .addTo(map);
+ 
+   var popup = new maptilersdk.Popup({ offset: 25 }).setHTML(
+    
+        `<h4>${listing.title}</h4><p>Exact location provided after booking</p>`
+    );
+     marker.setPopup(popup);
+  </script>
