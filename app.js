@@ -19,7 +19,10 @@ const reviews = require("./routes/review.js");
 
 
 //Initialize monogoooo
-const dbURL = process.env.ATLAS_URL;
+//  const dbURL =  "mongodb://127.0.0.1:27017/tripheaven";
+ const dbURL = process.env.ATLAS_URL;
+
+               
 let port = 8080;
  async function main(){
  await mongoose.connect(dbURL);

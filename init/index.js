@@ -2,11 +2,11 @@ const mongoose = require("mongoose");
 const initdata = require("./data.js");
 const Listing = require("../models/listing.js");
 
-const URL = "mongodb://127.0.0.1:27017/tripheaven";
+const dbURL = "mongodb://127.0.0.1:27017/tripheaven";
 
 async function main() {
   try {
-    await mongoose.connect(URL);
+    await mongoose.connect(dbURL);
     console.log("DB connected successfully");
     await init(); // Call init only after connection is established
   } catch (err) {
