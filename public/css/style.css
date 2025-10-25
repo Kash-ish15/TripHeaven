@@ -116,7 +116,10 @@ text-decoration: underline;
 }
 #map{
     height:400px;
-    width:80vh;
+    width:100%;
+    border-radius: 8px;
+    border: 1px solid #ddd;
+    margin-top: 10px;
 }
 .switch{
     border: 1px solid #000000;

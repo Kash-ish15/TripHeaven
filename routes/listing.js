@@ -28,6 +28,9 @@ router.get("/new",
     isLoggedin,(listingcon.new) 
     );
 
+// Fix coordinates route (must be before /:id routes)
+router.get("/fix-coordinates", isLoggedin, wrapAsync(listingcon.fixCoordinates));
+
 router
 .route("/:id")
 .get(wrapAsync(listingcon.show))

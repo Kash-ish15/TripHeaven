@@ -1,3 +1,5 @@
+// import mongoose from "mongoose";
+// import dotenv from "dotenv";
 require('dotenv').config()
 const express = require("express");
 const app = express();
@@ -19,8 +21,8 @@ const reviews = require("./routes/review.js");
 
 
 //Initialize monogoooo
-//  const dbURL =  "mongodb://127.0.0.1:27017/tripheaven";
- const dbURL = process.env.ATLAS_URL;
+ const dbURL =  "mongodb://127.0.0.1:27017/tripheaven";
+//  const dbURL = process.env.ATLAS_URL;
 
                
 let port = 8080;
@@ -100,5 +102,5 @@ app.use((err, req, res, next)=>{
     res.status(statusCode).render("error",{message});
 });
 app.listen(port, ()=>{
-    console.log("app is listening");
+    console.log(`app is listening on ${port}`);
 })

@@ -118,7 +118,7 @@ class="needs-validation">
   <h3>
     Where you'll be
   </h3>
-    <div id="map"></div>
+    <div id="map" style="height: 400px; width: 100%; border-radius: 8px; border: 1px solid #ddd; box-shadow: 0 2px 4px rgba(0,0,0,0.1);"></div>
    
 </div>
 </div>
@@ -130,29 +130,62 @@ class="needs-validation">
 
 
 <script> 
-  const mapToken = "<%= process.env.MAP_TOKEN %>";
-  const listing = <%-   JSON.stringify(listing) %>
+// Debug information
+console.log('MapTiler SDK loaded:', typeof maptilersdk !== 'undefined');
+console.log('Listing data:', <%-JSON.stringify(listing) %>);
 
+const tok = "<%= process.env.MAP_TOKEN %>";
+console.log('Token available:', tok ? 'Yes' : 'No');
 
-   maptilersdk.config.apiKey = mapToken;
-    const map = new maptilersdk.Map({
-        container: 'map', // container's id or the HTML element to render the map
-        center:listing.geometry.coordinates,
-        zoom:9,
-        style: maptilersdk.MapStyle.STREETS,
+// Check if listing has geometry coordinates
+const listing = <%-JSON.stringify(listing) %>;
+console.log('Listing geometry:', listing.geometry);
 
-      });
-      
+// Validate and format coordinates
+let coordinates = null;
+if (listing.geometry && listing.geometry.coordinates) {
+    const coords = listing.geometry.coordinates;
+    // Ensure coordinates are in the correct format [longitude, latitude]
+    if (Array.isArray(coords) && coords.length >= 2 && coords[0] !== 0 && coords[1] !== 0) {
+        coordinates = [parseFloat(coords[0]), parseFloat(coords[1])];
+        console.log('Formatted coordinates:', coordinates);
+    }
+}
 
+if (!coordinates) {
+    console.error('Listing does not have valid geometry coordinates');
+    document.getElementById('map').innerHTML = '<div style="color: #666; padding: 20px; text-align: center; background: #f8f9fa; border-radius: 8px;"><i class="fas fa-map-marker-alt" style="font-size: 2rem; margin-bottom: 10px; color: #dc3545;"></i><p>Map data not available for this listing.</p><p style="font-size: 0.9rem; color: #6c757d;">Coordinates: ' + JSON.stringify(listing.geometry) + '</p><p style="font-size: 0.8rem; color: #6c757d;">Please edit the listing and provide a full address to enable map display.</p></div>';
+} else if (!tok || tok === 'your_maptiler_token_here') {
+    console.error('MapTiler token not configured');
+    document.getElementById('map').innerHTML = '<p style="color: red; padding: 20px;">MapTiler API token not configured. Please set your MAP_TOKEN environment variable.</p>';
+} else {
+    try {
+        // Configure MapTiler SDK
+        maptilersdk.config.apiKey = tok;
+        
+        // Create the map
+        const map = new maptilersdk.Map({
+            container: 'map',
+            center: coordinates,
+            zoom: 9,
+            style: maptilersdk.MapStyle.STREETS,
+        });
 
-   
-  const marker = new maptilersdk.Marker({color:"red"})
-  .setLngLat(listing.geometry.coordinates)
-  .addTo(map);
- 
-   var popup = new maptilersdk.Popup({ offset: 25 }).setHTML(
-    
-        `<h4>${listing.title}</h4><p>Exact location provided after booking</p>`
-    );
-     marker.setPopup(popup);
-  </script>
+        // Add marker
+        const marker = new maptilersdk.Marker({color: "red"})
+            .setLngLat(coordinates)
+            .addTo(map);
+        
+        // Add popup
+        const popup = new maptilersdk.Popup({ offset: 25 }).setHTML(
+            `<h4>${listing.title}</h4><p>Exact location provided after booking</p>`
+        );
+        marker.setPopup(popup);
+        
+        console.log('Map initialized successfully with coordinates:', coordinates);
+    } catch (error) {
+        console.error('Error initializing map:', error);
+        document.getElementById('map').innerHTML = '<p style="color: red; padding: 20px;">Error loading map: ' + error.message + '</p>';
+    }
+}
+</script>

@@ -4,15 +4,15 @@ const mapToken = process.env.MAP_TOKEN;
 //finding cordinates using geocoding in maptiler
 async function geocodeLocation(query) {
   try {
-    const response = await axios.get(`https://api.maptiler.com/geocoding/${encodeURIComponent(query)}.json`, {
-      params: {
-        key: mapToken
-      }
-    });
+    console.log('Geocoding query:', query);
+    const response = await axios.get(`https://api.maptiler.com/geocoding/${encodeURIComponent(query)}.json?key=${mapToken}`);
 
-    if (response.data && response.data.features.length > 0) {
-      return response.data.features[0].geometry.coordinates; // [lng, lat]
+    if (response.data && response.data.features && response.data.features.length > 0) {
+      const coordinates = response.data.features[0].geometry.coordinates;
+      console.log('Geocoding successful:', coordinates);
+      return coordinates; // [lng, lat]
     } else {
+      console.log('No geocoding results found for:', query);
       return null;
     }
   } catch (err) {
@@ -32,16 +32,23 @@ module.exports.new = (req, res) => {
     
 }
 module.exports.create = async (req, res) => {
-  const address = req.body.listing.location; // or wherever you're storing the address
+  const {address} = req.body.listing.location; 
+  console.log('Address for geocoding:', address);
 
   const coordinates = await geocodeLocation(address); // [lng, lat]
-    console.log(coordinates);
+  console.log('Geocoded coordinates:', coordinates);
+
+  // Check if geocoding was successful
+  if (!coordinates || !Array.isArray(coordinates) || coordinates.length < 2) {
+    req.flash('error', 'Could not find coordinates for the provided address. Please provide a more specific address.');
+    return res.redirect('/listings/new');
+  }
 
   const listing = new Listing({
     ...req.body.listing,
     geometry: {
       type: 'Point',
-      coordinates: coordinates || [0, 0], // fallback
+      coordinates: coordinates,
     },
   
     image: {
@@ -58,7 +65,33 @@ module.exports.create = async (req, res) => {
 
 module.exports.update = async(req,res)=>{
 let{id} = req.params;
-let listing = await Listing.findByIdAndUpdate(id,{...req.body.listing});
+const {address} = req.body.listing.location;
+
+// Geocode the new address if provided
+let coordinates = null;
+if (address) {
+  coordinates = await geocodeLocation(address);
+  console.log('Updated coordinates:', coordinates);
+  
+  // Check if geocoding was successful
+  if (!coordinates || !Array.isArray(coordinates) || coordinates.length < 2) {
+    req.flash('error', 'Could not find coordinates for the provided address. Please provide a more specific address.');
+    return res.redirect(`/listings/${id}/edit`);
+  }
+}
+
+let updateData = {...req.body.listing};
+
+// Update geometry if new coordinates are available
+if (coordinates) {
+  updateData.geometry = {
+    type: 'Point',
+    coordinates: coordinates
+  };
+}
+
+let listing = await Listing.findByIdAndUpdate(id, updateData);
+
 if(typeof req.file !== "undefined"){
 let url = req.file.path;
 let filename = req.file.filename;
@@ -95,6 +128,38 @@ res.redirect("/listings");
 let originalImageUrl = listing.image.url;
 originalImageUrl = originalImageUrl.replace("/upload", "/upload/h_300,w_250")
     res.render("listings/edit.ejs",{ listing,originalImageUrl });
+}
+
+// Utility function to fix existing listings with empty coordinates
+module.exports.fixCoordinates = async(req,res)=>{
+    const listings = await Listing.find({});
+    let fixedCount = 0;
+    
+    for(let listing of listings) {
+        // Check if coordinates are empty or invalid
+        if (!listing.geometry || 
+            !listing.geometry.coordinates || 
+            listing.geometry.coordinates.length === 0 ||
+            (listing.geometry.coordinates[0] === 0 && listing.geometry.coordinates[1] === 0)) {
+            
+            // Try to geocode using location and country
+            const address = `${listing.location}, ${listing.country}`;
+            const coordinates = await geocodeLocation(address);
+            
+            if (coordinates && Array.isArray(coordinates) && coordinates.length >= 2) {
+                listing.geometry = {
+                    type: 'Point',
+                    coordinates: coordinates
+                };
+                await listing.save();
+                fixedCount++;
+                console.log(`Fixed coordinates for listing: ${listing.title}`);
+            }
+        }
+    }
+    
+    req.flash('success', `Fixed coordinates for ${fixedCount} listings.`);
+    res.redirect('/listings');
 }
  
 module.exports.delete = async(req,res)=>{

@@ -45,7 +45,12 @@
           <label for="country" class="form-label">Country</label>
            <input name="listing[country]" value="<%=listing.country%>" type="text" class="form-control" id="country" required>
            <div class="invalid-feedback">Enter a valid country</div>
-           </div><br><br>
+           </div><br>
+           <div>
+          <label for="address" class="form-label">Full Address (for map)</label>
+          <input name="listing[location][address]" placeholder="Enter full address for accurate map location" type="text" id="address" class="form-control" required>
+          <div class="invalid-feedback">Enter a valid address for map display</div>
+       </div><br><br>
            <button class="btn-ctr">Edit</button>
            <br>
            <br>
