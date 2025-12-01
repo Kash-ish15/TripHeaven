@@ -5,7 +5,7 @@ const express = require("express");
 const app = express();
 const mongoose = require("mongoose");
 const session = require("express-session");
-const MongoStore= require("connect-mongo")
+const MongoStore= require("connect-mongo");
 const methodOverride = require('method-override');
 const flash = require("connect-flash");
 const path = require("path");
@@ -55,7 +55,7 @@ const store = MongoStore.create({
 
 })
  store.on("error",() =>{
-    console.log("EROR IN MONGO SESSION STORE", err);tr
+    console.log("EROR IN MONGO SESSION STORE", err);
  })
 const sessionOption = {
     store, 
@@ -63,7 +63,7 @@ const sessionOption = {
     resave:false,
     saveUninitialized:true,
     cookie:{
-        expires: Date.now() + 7 *24*60*60*1000,
+        expires: Date.now() + 7*24*60*60*1000,
         maxAge: 7*24*60*60*1000, 
         httpOnly:true
     },
