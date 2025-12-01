@@ -14,6 +14,5 @@ Features--
  4.Cloud Image Upload using Cloudinary for storing and accessing listing images efficiently.
  5.Flash Messages & Error Handling for better user experience.
  6.Responsive frontend (with Bootstrap or Tailwind)
- 7.Integration of Google Maps or MapTiler for location-based listings
 
 
