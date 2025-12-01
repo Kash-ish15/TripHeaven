@@ -21,11 +21,11 @@ const reviews = require("./routes/review.js");
 
 
 //Initialize monogoooo
- const dbURL =  "mongodb://127.0.0.1:27017/tripheaven";
-//  const dbURL = process.env.ATLAS_URL;
+//  const dbURL =  "mongodb://127.0.0.1:27017/tripheaven";
+ const dbURL = process.env.ATLAS_URL;
 
                
-let port = 8080;
+let port =  process.env.PORT;
  async function main(){
  await mongoose.connect(dbURL);
 }
