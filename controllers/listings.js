@@ -1,25 +1,25 @@
 const Listing = require("../models/listing");
 const axios = require('axios');
-const mapToken = process.env.MAP_TOKEN;
+// const mapToken = process.env.MAP_TOKEN;
 //finding cordinates using geocoding in maptiler
-async function geocodeLocation(query) {
-  try {
-    console.log('Geocoding query:', query);
-    const response = await axios.get(`https://api.maptiler.com/geocoding/${encodeURIComponent(query)}.json?key=${mapToken}`);
+// async function geocodeLocation(query) {
+//   try {
+//     console.log('Geocoding query:', query);
+//     const response = await axios.get(`https://api.maptiler.com/geocoding/${encodeURIComponent(query)}.json?key=${mapToken}`);
 
-    if (response.data && response.data.features && response.data.features.length > 0) {
-      const coordinates = response.data.features[0].geometry.coordinates;
-      console.log('Geocoding successful:', coordinates);
-      return coordinates; // [lng, lat]
-    } else {
-      console.log('No geocoding results found for:', query);
-      return null;
-    }
-  } catch (err) {
-    console.error('Geocoding error:', err.message);
-    return null;
-  }
-}
+//     if (response.data && response.data.features && response.data.features.length > 0) {
+//       const coordinates = response.data.features[0].geometry.coordinates;
+//       console.log('Geocoding successful:', coordinates);
+//       return coordinates; // [lng, lat]
+//     } else {
+//       console.log('No geocoding results found for:', query);
+//       return null;
+//     }
+//   } catch (err) {
+//     console.error('Geocoding error:', err.message);
+//     return null;
+//   }
+// }
 
 module.exports.index = async(req, res)=>{
     
@@ -32,17 +32,17 @@ module.exports.new = (req, res) => {
     
 }
 module.exports.create = async (req, res) => {
-  const {address} = req.body.listing.location; 
-  console.log('Address for geocoding:', address);
+  // const {address} = req.body.listing.location; 
+  // console.log('Address for geocoding:', address);
 
-  const coordinates = await geocodeLocation(address); // [lng, lat]
-  console.log('Geocoded coordinates:', coordinates);
+  // const coordinates = await geocodeLocation(address); // [lng, lat]
+  // console.log('Geocoded coordinates:', coordinates);
 
   // Check if geocoding was successful
-  if (!coordinates || !Array.isArray(coordinates) || coordinates.length < 2) {
-    req.flash('error', 'Could not find coordinates for the provided address. Please provide a more specific address.');
-    return res.redirect('/listings/new');
-  }
+  // if (!coordinates || !Array.isArray(coordinates) || coordinates.length < 2) {
+  //   req.flash('error', 'Could not find coordinates for the provided address. Please provide a more specific address.');
+  //   return res.redirect('/listings/new');
+  // }
 
   const listing = new Listing({
     ...req.body.listing,
@@ -67,28 +67,28 @@ module.exports.update = async(req,res)=>{
 let{id} = req.params;
 const {address} = req.body.listing.location;
 
-// Geocode the new address if provided
-let coordinates = null;
-if (address) {
-  coordinates = await geocodeLocation(address);
-  console.log('Updated coordinates:', coordinates);
+// // Geocode the new address if provided
+// let coordinates = null;
+// if (address) {
+//   coordinates = await geocodeLocation(address);
+//   console.log('Updated coordinates:', coordinates);
   
-  // Check if geocoding was successful
-  if (!coordinates || !Array.isArray(coordinates) || coordinates.length < 2) {
-    req.flash('error', 'Could not find coordinates for the provided address. Please provide a more specific address.');
-    return res.redirect(`/listings/${id}/edit`);
-  }
-}
+//   // Check if geocoding was successful
+//   if (!coordinates || !Array.isArray(coordinates) || coordinates.length < 2) {
+//     req.flash('error', 'Could not find coordinates for the provided address. Please provide a more specific address.');
+//     return res.redirect(`/listings/${id}/edit`);
+//   }
+// }
 
 let updateData = {...req.body.listing};
 
 // Update geometry if new coordinates are available
-if (coordinates) {
-  updateData.geometry = {
-    type: 'Point',
-    coordinates: coordinates
-  };
-}
+// if (coordinates) {
+//   updateData.geometry = {
+//     type: 'Point',
+//     coordinates: coordinates
+//   };
+// }
 
 let listing = await Listing.findByIdAndUpdate(id, updateData);
 
@@ -107,15 +107,19 @@ module.exports.show = async (req, res) => {
        const listing = await Listing.findById(id).populate({path:"reviews",
          populate:
          {path:"author",
-
-         },
-        })
+           },})
         .populate("owner");
-       console.log(listing.owner.username);
+       
         if(!listing){
             req.flash("error","Listing you requested for does not exist!");
             res.redirect("/listings");
         }
+        
+        // Safely log owner username if owner exists
+        if(listing.owner && listing.owner.username){
+            console.log(listing.owner.username);
+        }
+        
         res.render("listings/show", { listing });
     } 
 module.exports.edit = async(req,res)=>{
@@ -131,36 +135,36 @@ originalImageUrl = originalImageUrl.replace("/upload", "/upload/h_300,w_250")
 }
 
 // Utility function to fix existing listings with empty coordinates
-module.exports.fixCoordinates = async(req,res)=>{
-    const listings = await Listing.find({});
-    let fixedCount = 0;
+// module.exports.fixCoordinates = async(req,res)=>{
+//     const listings = await Listing.find({});
+//     let fixedCount = 0;
     
-    for(let listing of listings) {
-        // Check if coordinates are empty or invalid
-        if (!listing.geometry || 
-            !listing.geometry.coordinates || 
-            listing.geometry.coordinates.length === 0 ||
-            (listing.geometry.coordinates[0] === 0 && listing.geometry.coordinates[1] === 0)) {
+//     for(let listing of listings) {
+//         // Check if coordinates are empty or invalid
+//         if (!listing.geometry || 
+//             !listing.geometry.coordinates || 
+//             listing.geometry.coordinates.length === 0 ||
+//             (listing.geometry.coordinates[0] === 0 && listing.geometry.coordinates[1] === 0)) {
             
-            // Try to geocode using location and country
-            const address = `${listing.location}, ${listing.country}`;
-            const coordinates = await geocodeLocation(address);
+//             // Try to geocode using location and country
+//             const address = `${listing.location}, ${listing.country}`;
+//             const coordinates = await geocodeLocation(address);
             
-            if (coordinates && Array.isArray(coordinates) && coordinates.length >= 2) {
-                listing.geometry = {
-                    type: 'Point',
-                    coordinates: coordinates
-                };
-                await listing.save();
-                fixedCount++;
-                console.log(`Fixed coordinates for listing: ${listing.title}`);
-            }
-        }
-    }
+//             if (coordinates && Array.isArray(coordinates) && coordinates.length >= 2) {
+//                 listing.geometry = {
+//                     type: 'Point',
+//                     coordinates: coordinates
+//                 };
+//                 await listing.save();
+//                 fixedCount++;
+//                 console.log(`Fixed coordinates for listing: ${listing.title}`);
+//             }
+//         }
+//     }
     
-    req.flash('success', `Fixed coordinates for ${fixedCount} listings.`);
-    res.redirect('/listings');
-}
+//     req.flash('success', `Fixed coordinates for ${fixedCount} listings.`);
+//     res.redirect('/listings');
+// }
  
 module.exports.delete = async(req,res)=>{
     let { id } = req.params;

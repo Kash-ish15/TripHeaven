@@ -25,7 +25,7 @@ const reviews = require("./routes/review.js");
  const dbURL = process.env.ATLAS_URL;
 
                
-let port =  process.env.PORT;
+let port =  process.env.PORT || 8080;
  async function main(){
  await mongoose.connect(dbURL);
 }

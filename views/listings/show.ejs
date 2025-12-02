@@ -14,7 +14,7 @@
   <div class="card-body">
    
     <p class="card-text">
-        <P>Owned by  <%= listing.owner.username %></P>
+       
         <p><%= listing.description %></p>
         <% if(listing.price) { %>
           <div>
@@ -27,7 +27,7 @@
        
        <p> <%= listing.country %></p>
     </p>
-    <% if(CurrUser && CurrUser._id.equals(listing.owner._id)){ %>
+    <% if(CurrUser && listing.owner && CurrUser._id.equals(listing.owner._id)){ %>
     <div class="btn-show row">
         <div class="btn-1 col-md-2 col-sm-3 btn-ctr ">
         <a href="/listings/<%=listing._id%>/edit" class="btn btn-ctr">Edit</a> </div>
@@ -98,7 +98,7 @@ class="needs-validation">
       <% for( let review of listing.reviews ) { %>
    <div class="card mb-3 ms-3 cols-5" style="width:18rem">
     <div class="card-body">
-      <h5 class="card-title">@<%=review.author.username %></h5>
+      <!-- <h5 class="card-title">@<%=review.author.username %></h5> -->
        <p class="card-text"><%=review.comment%></p>
        <p class="starability-result" data-rating="<%=review.rating%>"></p>
        
@@ -129,8 +129,8 @@ class="needs-validation">
 </div>   
 
 
-<script> 
-// Debug information
+<!-- <script>  
+Debug information
 console.log('MapTiler SDK loaded:', typeof maptilersdk !== 'undefined');
 console.log('Listing data:', <%-JSON.stringify(listing) %>);
 
@@ -188,4 +188,4 @@ if (!coordinates) {
         document.getElementById('map').innerHTML = '<p style="color: red; padding: 20px;">Error loading map: ' + error.message + '</p>';
     }
 }
-</script>
+</script> -->
